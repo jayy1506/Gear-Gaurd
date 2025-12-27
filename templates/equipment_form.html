@@ -3,86 +3,102 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% if equipment %}Edit Equipment{% else %}Create Equipment{% endif %}</title>
+    <title>{% if equipment %}Edit Equipment{% else %}Add Equipment{% endif %} - GearGuard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
     {% include 'base.html' %}
     
     <div class="container">
-        <h1>{% if equipment %}Edit Equipment{% else %}Create Equipment{% endif %}</h1>
+        <h1>{% if equipment %}Edit Equipment{% else %}Add Equipment{% endif %}</h1>
         
-        <form method="POST">
-            <div class="form-group">
-                <label for="name">Name:</label>
-                <input type="text" id="name" name="name" value="{{ equipment.name if equipment else '' }}" required>
+        <form method="POST" class="equipment-form">
+            <div class="form-row">
+                <div class="form-column">
+                    <div class="form-group">
+                        <label for="name">Equipment Name</label>
+                        <input type="text" id="name" name="name" value="{{ equipment.name if equipment else '' }}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="category">Category</label>
+                        <select id="category" name="category" required>
+                            <option value="Mechanical" {% if equipment and equipment.category == 'Mechanical' %}selected{% endif %}>Mechanical</option>
+                            <option value="Electrical" {% if equipment and equipment.category == 'Electrical' %}selected{% endif %}>Electrical</option>
+                            <option value="IT" {% if equipment and equipment.category == 'IT' %}selected{% endif %}>IT</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="department">Department</label>
+                        <select id="department" name="department" required>
+                            <option value="Production" {% if equipment and equipment.department == 'Production' %}selected{% endif %}>Production</option>
+                            <option value="Admin" {% if equipment and equipment.department == 'Admin' %}selected{% endif %}>Admin</option>
+                            <option value="IT" {% if equipment and equipment.department == 'IT' %}selected{% endif %}>IT</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="assigned_employee">Assigned To</label>
+                        <input type="text" id="assigned_employee" name="assigned_employee" value="{{ equipment.assigned_employee if equipment else '' }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="maintenance_team_id">Maintenance Team</label>
+                        <select id="maintenance_team_id" name="maintenance_team_id">
+                            <option value="">Select Team</option>
+                            {% for team in teams %}
+                                <option value="{{ team.id }}" {% if equipment and equipment.maintenance_team_id == team.id %}selected{% endif %}>{{ team.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="default_technician">Assigned Technician</label>
+                        <input type="text" id="default_technician" name="default_technician" value="{{ equipment.default_technician if equipment else '' }}">
+                    </div>
+                </div>
+                
+                <div class="form-column">
+                    <div class="form-group">
+                        <label for="serial_number">Serial Number</label>
+                        <input type="text" id="serial_number" name="serial_number" value="{{ equipment.serial_number if equipment else '' }}" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="purchase_date">Purchase Date</label>
+                        <input type="date" id="purchase_date" name="purchase_date" value="{{ equipment.purchase_date.strftime('%Y-%m-%d') if equipment and equipment.purchase_date else '' }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="warranty_end">Warranty End Date</label>
+                        <input type="date" id="warranty_end" name="warranty_end" value="{{ equipment.warranty_end.strftime('%Y-%m-%d') if equipment and equipment.warranty_end else '' }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="location">Location</label>
+                        <input type="text" id="location" name="location" value="{{ equipment.location if equipment else '' }}">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="status">Status</label>
+                        <select id="status" name="status">
+                            <option value="Active" {% if equipment and equipment.status == 'Active' %}selected{% endif %}>Active</option>
+                            <option value="Scrapped" {% if equipment and equipment.status == 'Scrapped' %}selected{% endif %}>Scrapped</option>
+                        </select>
+                    </div>
+                </div>
             </div>
             
             <div class="form-group">
-                <label for="serial_number">Serial Number:</label>
-                <input type="text" id="serial_number" name="serial_number" value="{{ equipment.serial_number if equipment else '' }}" required>
+                <label for="notes">Notes</label>
+                <textarea id="notes" name="notes" rows="4">{{ equipment.notes if equipment else '' }}</textarea>
             </div>
             
-            <div class="form-group">
-                <label for="category">Category:</label>
-                <select id="category" name="category" required>
-                    <option value="Mechanical" {% if equipment and equipment.category == 'Mechanical' %}selected{% endif %}>Mechanical</option>
-                    <option value="Electrical" {% if equipment and equipment.category == 'Electrical' %}selected{% endif %}>Electrical</option>
-                    <option value="IT" {% if equipment and equipment.category == 'IT' %}selected{% endif %}>IT</option>
-                </select>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Save</button>
+                <a href="{{ url_for('equipment_list') }}" class="btn btn-secondary">Cancel</a>
             </div>
-            
-            <div class="form-group">
-                <label for="department">Department:</label>
-                <select id="department" name="department" required>
-                    <option value="Production" {% if equipment and equipment.department == 'Production' %}selected{% endif %}>Production</option>
-                    <option value="Admin" {% if equipment and equipment.department == 'Admin' %}selected{% endif %}>Admin</option>
-                    <option value="IT" {% if equipment and equipment.department == 'IT' %}selected{% endif %}>IT</option>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label for="assigned_employee">Assigned Employee:</label>
-                <input type="text" id="assigned_employee" name="assigned_employee" value="{{ equipment.assigned_employee if equipment else '' }}">
-            </div>
-            
-            <div class="form-group">
-                <label for="maintenance_team_id">Maintenance Team:</label>
-                <select id="maintenance_team_id" name="maintenance_team_id">
-                    <option value="">Select Team</option>
-                    {% for team in teams %}
-                        <option value="{{ team.id }}" {% if equipment and equipment.maintenance_team_id == team.id %}selected{% endif %}>{{ team.name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label for="default_technician">Default Technician:</label>
-                <input type="text" id="default_technician" name="default_technician" value="{{ equipment.default_technician if equipment else '' }}">
-            </div>
-            
-            <div class="form-group">
-                <label for="purchase_date">Purchase Date:</label>
-                <input type="date" id="purchase_date" name="purchase_date" value="{{ equipment.purchase_date.strftime('%Y-%m-%d') if equipment and equipment.purchase_date else '' }}">
-            </div>
-            
-            <div class="form-group">
-                <label for="warranty_end">Warranty End:</label>
-                <input type="date" id="warranty_end" name="warranty_end" value="{{ equipment.warranty_end.strftime('%Y-%m-%d') if equipment and equipment.warranty_end else '' }}">
-            </div>
-            
-            <div class="form-group">
-                <label for="location">Location:</label>
-                <input type="text" id="location" name="location" value="{{ equipment.location if equipment else '' }}">
-            </div>
-            
-            <div class="form-group">
-                <label for="notes">Notes:</label>
-                <textarea id="notes" name="notes">{{ equipment.notes if equipment else '' }}</textarea>
-            </div>
-            
-            <button type="submit" class="btn btn-primary">{% if equipment %}Update{% else %}Create{% endif %} Equipment</button>
-            <a href="{{ url_for('equipment_list') }}" class="btn btn-secondary">Cancel</a>
         </form>
     </div>
 </body>

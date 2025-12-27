@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maintenance Teams - GearGuard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    {% include 'base.html' %}
+    
+    <div class="container">
+        <div class="teams-grid">
+            {% for team in teams %}
+            <div class="team-card">
+                <h3>{{ team.name }}</h3>
+                <div class="team-members">
+                    {% set members_list = team.members.split(',') %}
+                    {% for member in members_list %}
+                        <div class="team-member">{{ member.strip() }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="table-actions">
+            <a href="{{ url_for('create_team') }}" class="btn btn-primary">Add Team</a>
+        </div>
+    </div>
+</body>
+</html>

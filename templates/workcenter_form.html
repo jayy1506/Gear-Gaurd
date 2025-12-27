@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}{% if workcenter %}Edit Work Center{% else %}Add Work Center{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="form-container">
+        <h1>{% if workcenter %}Edit Work Center{% else %}Add New Work Center{% endif %}</h1>
+        
+        <form method="POST" action="{% if workcenter %}{{ url_for('edit_workcenter', id=workcenter.id) }}{% else %}{{ url_for('create_workcenter') }}{% endif %}">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="name">Work Center Name *</label>
+                    <input type="text" class="form-control" id="name" name="name" value="{{ workcenter.name if workcenter else '' }}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="code">Work Center Code *</label>
+                    <input type="text" class="form-control" id="code" name="code" value="{{ workcenter.code if workcenter else '' }}" required>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="location">Location</label>
+                    <input type="text" class="form-control" id="location" name="location" value="{{ workcenter.location if workcenter else '' }}">
+                </div>
+                
+                <div class="form-group">
+                    <label for="department">Department</label>
+                    <input type="text" class="form-control" id="department" name="department" value="{{ workcenter.department if workcenter else '' }}">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="responsible_person">Responsible Person</label>
+                    <input type="text" class="form-control" id="responsible_person" name="responsible_person" value="{{ workcenter.responsible_person if workcenter else '' }}">
+                </div>
+                
+                <div class="form-group">
+                    <label for="status">Status</label>
+                    <select class="form-control" id="status" name="status">
+                        <option value="Active" {% if workcenter and workcenter.status == 'Active' %}selected{% endif %}>Active</option>
+                        <option value="Inactive" {% if workcenter and workcenter.status == 'Inactive' %}selected{% endif %}>Inactive</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea class="form-control" id="description" name="description" rows="3">{{ workcenter.description if workcenter else '' }}</textarea>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">{% if workcenter %}Update{% else %}Create{% endif %} Work Center</button>
+                <a href="{{ url_for('workcenters_list') }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

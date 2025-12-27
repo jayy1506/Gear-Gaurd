@@ -1,172 +1,182 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - GearGuard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-    {% include 'base.html' %}
-    
-    <div class="container">
-        <h1>Maintenance Kanban Board</h1>
-        
-        <div class="kanban-board">
-            <!-- New Column -->
-            <div class="kanban-column">
-                <h2>New</h2>
-                {% for request in new_requests %}
-                    <div class="kanban-card new-card">
-                        <div class="card-header">
-                            <h3>{{ request.subject }}</h3>
-                        </div>
-                        <div class="card-body">
-                            <p><strong>Equipment:</strong> {{ request.equipment.name if request.equipment else 'N/A' }}</p>
-                            <p><strong>Technician:</strong> {{ request.assigned_technician or 'Unassigned' }}</p>
-                            {% if request.scheduled_date %}
-                                <p class="overdue {% if request.scheduled_date < now() %}overdue{% endif %}">
-                                    <strong>Scheduled:</strong> {{ request.scheduled_date.strftime('%Y-%m-%d %H:%M') }}
-                                </p>
-                            {% endif %}
-                        </div>
-                        <div class="card-actions">
-                            <form method="POST" action="{{ url_for('update_request_stage', id=request.id) }}" style="display: inline;">
-                                <input type="hidden" name="stage" value="In Progress">
-                                <button type="submit" class="btn btn-secondary">Start</button>
-                            </form>
-                            <a href="{{ url_for('edit_request', id=request.id) }}" class="btn btn-info">Edit</a>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-            
-            <!-- In Progress Column -->
-            <div class="kanban-column">
-                <h2>In Progress</h2>
-                {% for request in in_progress_requests %}
-                    <div class="kanban-card in-progress-card">
-                        <div class="card-header">
-                            <h3>{{ request.subject }}</h3>
-                        </div>
-                        <div class="card-body">
-                            <p><strong>Equipment:</strong> {{ request.equipment.name if request.equipment else 'N/A' }}</p>
-                            <p><strong>Technician:</strong> {{ request.assigned_technician or 'Unassigned' }}</p>
-                            {% if request.scheduled_date %}
-                                <p class="overdue {% if request.scheduled_date < now() %}overdue{% endif %}">
-                                    <strong>Scheduled:</strong> {{ request.scheduled_date.strftime('%Y-%m-%d %H:%M') }}
-                                </p>
-                            {% endif %}
-                        </div>
-                        <div class="card-actions">
-                            <form method="POST" action="{{ url_for('update_request_stage', id=request.id) }}" style="display: inline;">
-                                <input type="hidden" name="stage" value="Repaired">
-                                <button type="submit" class="btn btn-success">Complete</button>
-                            </form>
-                            <form method="POST" action="{{ url_for('update_request_stage', id=request.id) }}" style="display: inline;">
-                                <input type="hidden" name="stage" value="Scrap">
-                                <button type="submit" class="btn btn-danger">Scrap</button>
-                            </form>
-                            <a href="{{ url_for('edit_request', id=request.id) }}" class="btn btn-info">Edit</a>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-            
-            <!-- Repaired Column -->
-            <div class="kanban-column">
-                <h2>Repaired</h2>
-                {% for request in repaired_requests %}
-                    <div class="kanban-card repaired-card">
-                        <div class="card-header">
-                            <h3>{{ request.subject }}</h3>
-                        </div>
-                        <div class="card-body">
-                            <p><strong>Equipment:</strong> {{ request.equipment.name if request.equipment else 'N/A' }}</p>
-                            <p><strong>Technician:</strong> {{ request.assigned_technician or 'Unassigned' }}</p>
-                            {% if request.scheduled_date %}
-                                <p><strong>Scheduled:</strong> {{ request.scheduled_date.strftime('%Y-%m-%d %H:%M') }}</p>
-                            {% endif %}
-                            {% if request.duration_hours %}
-                                <p><strong>Duration:</strong> {{ request.duration_hours }} hours</p>
-                            {% endif %}
-                        </div>
-                        <div class="card-actions">
-                            <a href="{{ url_for('edit_request', id=request.id) }}" class="btn btn-info">View</a>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-            
-            <!-- Scrap Column -->
-            <div class="kanban-column">
-                <h2>Scrap</h2>
-                {% for request in scrap_requests %}
-                    <div class="kanban-card scrap-card">
-                        <div class="card-header">
-                            <h3>{{ request.subject }}</h3>
-                        </div>
-                        <div class="card-body">
-                            <p><strong>Equipment:</strong> {{ request.equipment.name if request.equipment else 'N/A' }}</p>
-                            <p><strong>Technician:</strong> {{ request.assigned_technician or 'Unassigned' }}</p>
-                            <p><strong>Status:</strong> Equipment Scrapped</p>
-                            {% if request.scheduled_date %}
-                                <p><strong>Scheduled:</strong> {{ request.scheduled_date.strftime('%Y-%m-%d %H:%M') }}</p>
-                            {% endif %}
-                        </div>
-                        <div class="card-actions">
-                            <a href="{{ url_for('edit_request', id=request.id) }}" class="btn btn-info">View</a>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="header">
+        <h1>Dashboard</h1>
+        <div class="header-actions">
+            <a href="{{ url_for('create_request') }}" class="btn btn-primary">Create Request</a>
         </div>
     </div>
     
-    <script>
-        // Make kanban cards draggable
-        document.addEventListener('DOMContentLoaded', function() {
-            const draggables = document.querySelectorAll('.kanban-card');
-            const columns = document.querySelectorAll('.kanban-column');
-            
-            draggables.forEach(draggable => {
-                draggable.addEventListener('dragstart', () => {
-                    draggable.classList.add('dragging');
-                });
-                
-                draggable.addEventListener('dragend', () => {
-                    draggable.classList.remove('dragging');
-                });
-            });
-            
-            columns.forEach(column => {
-                column.addEventListener('dragover', e => {
-                    e.preventDefault();
-                    const afterElement = getDragAfterElement(column, e.clientY);
-                    const draggable = document.querySelector('.dragging');
-                    if (afterElement == null) {
-                        column.appendChild(draggable);
-                    } else {
-                        column.insertBefore(draggable, afterElement);
-                    }
-                });
-            });
-            
-            function getDragAfterElement(container, y) {
-                const draggableElements = [...container.querySelectorAll('.kanban-card:not(.dragging)')];
-                
-                return draggableElements.reduce((closest, child) => {
-                    const box = child.getBoundingClientRect();
-                    const offset = y - box.top - box.height / 2;
-                    
-                    if (offset < 0 && offset > closest.offset) {
-                        return { offset: offset, element: child };
-                    } else {
-                        return closest;
-                    }
-                }, { offset: Number.NEGATIVE_INFINITY }).element;
-            }
-        });
-    </script>
-</body>
-</html>
+    <!-- Dashboard Summary Cards -->
+    <div class="dashboard-summary">
+        <div class="summary-card">
+            <h3>{{ new_requests|length }}</h3>
+            <p>New Requests</p>
+        </div>
+        <div class="summary-card">
+            <h3>{{ in_progress_requests|length }}</h3>
+            <p>In Progress</p>
+        </div>
+        <div class="summary-card">
+            <h3>{{ repaired_requests|length }}</h3>
+            <p>Repaired</p>
+        </div>
+        <div class="summary-card">
+            <h3>{{ scrap_requests|length }}</h3>
+            <p>Scrapped</p>
+        </div>
+    </div>
+    
+    <div class="kanban-board">
+        <!-- New Requests Column -->
+        <div class="kanban-column">
+            <h2>New ({{ new_requests|length }})</h2>
+            {% for request in new_requests %}
+            <div class="kanban-card new-card">
+                <div class="card-header">
+                    <h3>{{ request.subject }}</h3>
+                </div>
+                <div class="card-body">
+                    <p><strong>Equipment:</strong> {{ request.equipment.name if request.equipment else 'N/A' }}</p>
+                    <p><strong>Work Center:</strong> {{ request.workcenter.name if request.workcenter else 'N/A' }}</p>
+                    <p><strong>Technician:</strong> {{ request.assigned_technician or 'Unassigned' }}</p>
+                    <p><strong>Category:</strong> {{ request.category or 'N/A' }}</p>
+                    {% if request.scheduled_date %}
+                    <p><strong>Scheduled:</strong> {{ request.scheduled_date.strftime('%Y-%m-%d %H:%M') }}</p>
+                    {% endif %}
+                </div>
+                <div class="card-actions">
+                    <a href="{{ url_for('edit_request', id=request.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+                    <a href="{{ url_for('update_request_stage', id=request.id) }}?stage=In Progress" class="btn btn-sm btn-outline-info">Start</a>
+                </div>
+            </div>
+            {% endfor %}
+            {% if not new_requests %}
+            <div class="empty-card">No new requests</div>
+            {% endif %}
+        </div>
+        
+        <!-- In Progress Column -->
+        <div class="kanban-column">
+            <h2>In Progress ({{ in_progress_requests|length }})</h2>
+            {% for request in in_progress_requests %}
+            <div class="kanban-card in-progress-card">
+                <div class="card-header">
+                    <h3>{{ request.subject }}</h3>
+                </div>
+                <div class="card-body">
+                    <p><strong>Equipment:</strong> {{ request.equipment.name if request.equipment else 'N/A' }}</p>
+                    <p><strong>Work Center:</strong> {{ request.workcenter.name if request.workcenter else 'N/A' }}</p>
+                    <p><strong>Technician:</strong> {{ request.assigned_technician or 'Unassigned' }}</p>
+                    <p><strong>Category:</strong> {{ request.category or 'N/A' }}</p>
+                    {% if request.scheduled_date %}
+                    <p><strong>Scheduled:</strong> {{ request.scheduled_date.strftime('%Y-%m-%d %H:%M') }}</p>
+                    {% endif %}
+                </div>
+                <div class="card-actions">
+                    <a href="{{ url_for('edit_request', id=request.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+                    <a href="{{ url_for('update_request_stage', id=request.id) }}?stage=Repaired" class="btn btn-sm btn-outline-success">Complete</a>
+                </div>
+            </div>
+            {% endfor %}
+            {% if not in_progress_requests %}
+            <div class="empty-card">No in-progress requests</div>
+            {% endif %}
+        </div>
+        
+        <!-- Repaired Column -->
+        <div class="kanban-column">
+            <h2>Repaired ({{ repaired_requests|length }})</h2>
+            {% for request in repaired_requests %}
+            <div class="kanban-card repaired-card">
+                <div class="card-header">
+                    <h3>{{ request.subject }}</h3>
+                </div>
+                <div class="card-body">
+                    <p><strong>Equipment:</strong> {{ request.equipment.name if request.equipment else 'N/A' }}</p>
+                    <p><strong>Work Center:</strong> {{ request.workcenter.name if request.workcenter else 'N/A' }}</p>
+                    <p><strong>Technician:</strong> {{ request.assigned_technician or 'Unassigned' }}</p>
+                    <p><strong>Category:</strong> {{ request.category or 'N/A' }}</p>
+                    {% if request.scheduled_date %}
+                    <p><strong>Scheduled:</strong> {{ request.scheduled_date.strftime('%Y-%m-%d %H:%M') }}</p>
+                    {% endif %}
+                </div>
+                <div class="card-actions">
+                    <a href="{{ url_for('edit_request', id=request.id) }}" class="btn btn-sm btn-outline-primary">View</a>
+                </div>
+            </div>
+            {% endfor %}
+            {% if not repaired_requests %}
+            <div class="empty-card">No repaired requests</div>
+            {% endif %}
+        </div>
+        
+        <!-- Scrap Column -->
+        <div class="kanban-column">
+            <h2>Scrap ({{ scrap_requests|length }})</h2>
+            {% for request in scrap_requests %}
+            <div class="kanban-card scrap-card">
+                <div class="card-header">
+                    <h3>{{ request.subject }}</h3>
+                </div>
+                <div class="card-body">
+                    <p><strong>Equipment:</strong> {{ request.equipment.name if request.equipment else 'N/A' }}</p>
+                    <p><strong>Work Center:</strong> {{ request.workcenter.name if request.workcenter else 'N/A' }}</p>
+                    <p><strong>Technician:</strong> {{ request.assigned_technician or 'Unassigned' }}</p>
+                    <p><strong>Category:</strong> {{ request.category or 'N/A' }}</p>
+                    {% if request.scheduled_date %}
+                    <p><strong>Scheduled:</strong> {{ request.scheduled_date.strftime('%Y-%m-%d %H:%M') }}</p>
+                    {% endif %}
+                </div>
+                <div class="card-actions">
+                    <a href="{{ url_for('edit_request', id=request.id) }}" class="btn btn-sm btn-outline-primary">View</a>
+                </div>
+            </div>
+            {% endfor %}
+            {% if not scrap_requests %}
+            <div class="empty-card">No scrap requests</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.dashboard-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.summary-card {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    border: 1px solid rgba(0,0,0,0.05);
+    transition: transform 0.3s ease;
+}
+
+.summary-card:hover {
+    transform: translateY(-5px);
+}
+
+.summary-card h3 {
+    margin: 0;
+    font-size: 2.5rem;
+    color: #3498db;
+    font-weight: 700;
+}
+
+.summary-card p {
+    margin: 0.5rem 0 0 0;
+    color: #7f8c8d;
+    font-size: 1rem;
+}
+</style>
+{% endblock %}

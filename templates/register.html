@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Register{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <h2>Create an Account</h2>
+    <p class="auth-subtitle">Join GearGuard to manage your maintenance operations</p>
+    
+    <form method="POST">
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" required placeholder="Enter desired username">
+        </div>
+        
+        <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" name="email" required placeholder="Enter your email">
+        </div>
+        
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required placeholder="Create a strong password">
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Create Account</button>
+    </form>
+    
+    <div class="auth-footer">
+        <p><a href="{{ url_for('login') }}">Already have an account? Login here</a></p>
+        <p class="auth-note">By registering, you agree to our terms and privacy policy</p>
+    </div>
+</div>
+
+<style>
+.auth-subtitle {
+    text-align: center;
+    color: #7f8c8d;
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+}
+
+.auth-footer {
+    margin-top: 1.5rem;
+    text-align: center;
+}
+
+.auth-note {
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    color: #7f8c8d;
+    font-style: italic;
+}
+</style>
+{% endblock %}

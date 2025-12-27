@@ -10,21 +10,45 @@
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-logo">
-                <a href="{{ url_for('dashboard') }}"> GearGuard</a>
+                <a href="{% if current_user %}{{ url_for('dashboard') }}{% else %}{{ url_for('login') }}{% endif %}"> GearGuard</a>
             </div>
             <ul class="nav-menu">
+                {% if current_user %}
                 <li class="nav-item">
                     <a href="{{ url_for('dashboard') }}" class="nav-link">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('worksheets') }}" class="nav-link">Worksheets</a>
                 </li>
                 <li class="nav-item">
                     <a href="{{ url_for('equipment_list') }}" class="nav-link">Equipment</a>
                 </li>
                 <li class="nav-item">
+                    <a href="{{ url_for('workcenters_list') }}" class="nav-link">Work Centers</a>
+                </li>
+                <li class="nav-item">
                     <a href="{{ url_for('maintenance_requests') }}" class="nav-link">Requests</a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('teams_list') }}" class="nav-link">Teams</a>
                 </li>
                 <li class="nav-item">
                     <a href="{{ url_for('calendar_view') }}" class="nav-link">Calendar</a>
                 </li>
+                <li class="nav-item">
+                    <span class="nav-user">Welcome, {{ current_user.username }}!</span>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('logout') }}" class="nav-link">Logout</a>
+                </li>
+                {% else %}
+                <li class="nav-item">
+                    <a href="{{ url_for('login') }}" class="nav-link">Login</a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ url_for('register') }}" class="nav-link">Register</a>
+                </li>
+                {% endif %}
             </ul>
         </div>
     </nav>
@@ -42,5 +66,11 @@
         
         {% block content %}{% endblock %}
     </main>
+    
+    <footer class="footer">
+        <div class="footer-content">
+            <p>Created by Team Jay &copy; 2025 - GearGuard Maintenance Tracker</p>
+        </div>
+    </footer>
 </body>
 </html>

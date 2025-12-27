@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maintenance Requests - GearGuard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    {% include 'base.html' %}
+    
+    <div class="container">
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Request ID</th>
+                        <th>Subject</th>
+                        <th>Equipment</th>
+                        <th>Team</th>
+                        <th>Technician</th>
+                        <th>Request Type</th>
+                        <th>Stage</th>
+                        <th>Scheduled Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for request in requests %}
+                    <tr>
+                        <td>{{ request.id }}</td>
+                        <td>{{ request.subject }}</td>
+                        <td>{{ request.equipment.name if request.equipment else 'N/A' }}</td>
+                        <td>{{ request.maintenance_team.name if request.maintenance_team else 'N/A' }}</td>
+                        <td>{{ request.assigned_technician or 'Unassigned' }}</td>
+                        <td>{{ request.request_type }}</td>
+                        <td>{{ request.stage }}</td>
+                        <td>{{ request.scheduled_date.strftime('%Y-%m-%d %H:%M') if request.scheduled_date else 'N/A' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="table-actions">
+            <a href="{{ url_for('create_request') }}" class="btn btn-primary">Add Request</a>
+        </div>
+    </div>
+</body>
+</html>

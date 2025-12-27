@@ -1,4 +1,4 @@
-from models import db, Equipment, MaintenanceTeam, MaintenanceRequest
+from models import db, User, Equipment, MaintenanceTeam, MaintenanceRequest, WorkCenter
 from datetime import datetime, timedelta
 from app import app
 
@@ -8,12 +8,57 @@ def seed_data():
         db.drop_all()
         db.create_all()
         
+        # Create initial admin user
+        admin_user = User(username='admin', email='admin@gearguard.com')
+        admin_user.set_password('admin123')
+        admin_user.role = 'admin'
+        db.session.add(admin_user)
+        
+        # Create another demo user
+        demo_user = User(username='demo', email='demo@gearguard.com')
+        demo_user.set_password('demo123')
+        demo_user.role = 'user'
+        db.session.add(demo_user)
+        
         # Create 3 maintenance teams
         team1 = MaintenanceTeam(name="Mechanical Team", members="John Smith, Mike Johnson, Sarah Davis")
         team2 = MaintenanceTeam(name="Electrical Team", members="Robert Wilson, Lisa Brown, Tom Anderson")
         team3 = MaintenanceTeam(name="IT Team", members="Amanda Taylor, Chris Lee, David Miller")
         
         db.session.add_all([team1, team2, team3])
+        
+        # Create 3 work centers
+        wc1 = WorkCenter(
+            name="Assembly Line 1",
+            code="AL1",
+            location="Factory Floor A",
+            department="Production",
+            responsible_person="Mike Johnson",
+            description="Main assembly line for product manufacturing",
+            status="Active"
+        )
+        
+        wc2 = WorkCenter(
+            name="Painting Station",
+            code="PS1",
+            location="Factory Floor B",
+            department="Production",
+            responsible_person="Sarah Williams",
+            description="Automated painting and coating station",
+            status="Active"
+        )
+        
+        wc3 = WorkCenter(
+            name="Quality Control Lab",
+            code="QCL",
+            location="Building C",
+            department="Quality",
+            responsible_person="Robert Taylor",
+            description="Quality testing and inspection lab",
+            status="Active"
+        )
+        
+        db.session.add_all([wc1, wc2, wc3])
         db.session.commit()
         
         # Create 8 equipment records

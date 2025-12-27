@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Equipment - GearGuard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    {% include 'base.html' %}
+    
+    <div class="container">
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Equipment Name</th>
+                        <th>Category</th>
+                        <th>Department</th>
+                        <th>Assigned To</th>
+                        <th>Maintenance Team</th>
+                        <th>Status</th>
+                        <th>Maintenance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for equip in equipment %}
+                    <tr>
+                        <td>{{ equip.name }}</td>
+                        <td>{{ equip.category }}</td>
+                        <td>{{ equip.department }}</td>
+                        <td>{{ equip.assigned_employee or 'Unassigned' }}</td>
+                        <td>{{ equip.maintenance_team.name if equip.maintenance_team else 'N/A' }}</td>
+                        <td><span class="status {{ equip.status.lower() }}">{{ equip.status }}</span></td>
+                        <td>
+                            <a href="{{ url_for('equipment_maintenance_requests', equip_id=equip.id) }}" class="btn btn-warning">
+                                Maintenance 
+                                <span class="badge">{{ equip.maintenance_requests|selectattr('stage', 'equalto', 'New')|list|length }}</span>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="table-actions">
+            <a href="{{ url_for('create_equipment') }}" class="btn btn-primary">Add Equipment</a>
+        </div>
+    </div>
+</body>
+</html>

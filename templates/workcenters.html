@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Work Centers{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="header">
+        <h1>Work Centers</h1>
+        <a href="{{ url_for('create_workcenter') }}" class="btn btn-primary">Add Work Center</a>
+    </div>
+    
+    <div class="table-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Code</th>
+                    <th>Location</th>
+                    <th>Department</th>
+                    <th>Responsible Person</th>
+                    <th>Status</th>
+                    <th>Created Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for workcenter in workcenters %}
+                <tr>
+                    <td>{{ workcenter.name }}</td>
+                    <td>{{ workcenter.code }}</td>
+                    <td>{{ workcenter.location or 'N/A' }}</td>
+                    <td>{{ workcenter.department or 'N/A' }}</td>
+                    <td>{{ workcenter.responsible_person or 'N/A' }}</td>
+                    <td><span class="badge {{ 'badge-success' if workcenter.status == 'Active' else 'badge-secondary' }}">{{ workcenter.status }}</span></td>
+                    <td>{{ workcenter.created_at.strftime('%Y-%m-%d') if workcenter.created_at else 'N/A' }}</td>
+                    <td>
+                        <a href="{{ url_for('edit_workcenter', id=workcenter.id) }}" class="btn btn-sm btn-outline-primary">Edit</a>
+                        <form method="POST" action="{{ url_for('delete_workcenter', id=workcenter.id) }}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this work center?')">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

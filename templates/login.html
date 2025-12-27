@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <h2>Login to GearGuard</h2>
+    <p class="auth-subtitle">Manage your maintenance operations efficiently</p>
+    
+    <form method="POST">
+        <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" name="email" required placeholder="Enter your email">
+        </div>
+        
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" required placeholder="Enter your password">
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Sign In</button>
+    </form>
+    
+    <div class="auth-footer">
+        <p><a href="{{ url_for('register') }}">Don't have an account? Register here</a></p>
+        <p class="auth-note">Demo credentials: admin@gearguard.com / admin123</p>
+    </div>
+</div>
+
+<style>
+.auth-subtitle {
+    text-align: center;
+    color: #7f8c8d;
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+}
+
+.auth-footer {
+    margin-top: 1.5rem;
+    text-align: center;
+}
+
+.auth-note {
+    margin-top: 1rem;
+    font-size: 0.85rem;
+    color: #7f8c8d;
+    font-style: italic;
+}
+</style>
+{% endblock %}
