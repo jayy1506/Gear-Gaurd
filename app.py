@@ -2,8 +2,36 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from models import db, User, Equipment, MaintenanceTeam, MaintenanceRequest, WorkCenter
 from datetime import datetime
 import os
+import re
 from datetime import datetime as dt
 from firebase_auth_service import FirebaseAuthService
+
+
+def validate_password(password):
+    """
+    Validate password requirements:
+    - At least 8 characters
+    - At least one uppercase letter
+    - At least one lowercase letter
+    - At least one number
+    - At least one special character
+    """
+    if len(password) < 8:
+        return False, "Password must be at least 8 characters long"
+    
+    if not re.search(r"[A-Z]", password):
+        return False, "Password must contain at least one uppercase letter"
+    
+    if not re.search(r"[a-z]", password):
+        return False, "Password must contain at least one lowercase letter"
+    
+    if not re.search(r"[0-9]", password):
+        return False, "Password must contain at least one number"
+    
+    if not re.search(r"[!@#$%^&*()_+\-=\[\]{};':\"\\|,.<>\/?]", password):
+        return False, "Password must contain at least one special character"
+    
+    return True, "Password is valid"
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite3'
@@ -30,6 +58,12 @@ def register():
         # Validate email format
         if not FirebaseAuthService.validate_email(email):
             flash('Please enter a valid email address', 'error')
+            return render_template('register.html')
+        
+        # Validate password strength
+        is_valid, message = validate_password(password)
+        if not is_valid:
+            flash(message, 'error')
             return render_template('register.html')
         
         # Check if user already exists in local database

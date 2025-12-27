@@ -21,6 +21,7 @@
         <div class="form-group">
             <label for="password">Password</label>
             <input type="password" id="password" name="password" required placeholder="Create a strong password">
+            <small class="password-requirements">Password must contain at least 8 characters, one uppercase, one lowercase, one number, and one special character.</small>
         </div>
         
         <button type="submit" class="btn btn-primary">Create Account</button>
@@ -49,6 +50,14 @@
     margin-top: 1rem;
     font-size: 0.85rem;
     color: #7f8c8d;
+    font-style: italic;
+}
+
+.password-requirements {
+    display: block;
+    margin-top: 0.3rem;
+    font-size: 0.75rem;
+    color: #e74c3c;
     font-style: italic;
 }
 </style>
