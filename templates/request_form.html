@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if request %}Edit Maintenance Request{% else %}Create Maintenance Request{% endif %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    {% include 'base.html' %}
+    
+    <div class="container" data-is-editing="{% if request %}true{% else %}false{% endif %}">
+        <h1>{% if request %}Edit Maintenance Request{% else %}Create Maintenance Request{% endif %}</h1>
+        
+        <form method="POST" id="request-form">
+            <div class="form-group">
+                <label for="subject">Subject:</label>
+                <input type="text" id="subject" name="subject" value="{{ request.subject if request else '' }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="request_type">Request Type:</label>
+                <select id="request_type" name="request_type" required onchange="toggleScheduledDate()">
+                    <option value="Corrective" {% if request and request.request_type == 'Corrective' %}selected{% endif %}>Corrective</option>
+                    <option value="Preventive" {% if request and request.request_type == 'Preventive' %}selected{% endif %}>Preventive</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="equipment_id">Equipment:</label>
+                <select id="equipment_id" name="equipment_id" required onchange="autoFillEquipmentInfo()">
+                    <option value="">Select Equipment</option>
+                    {% for equip in equipment_list %}
+                        <option value="{{ equip.id }}" 
+                                data-category="{{ equip.category }}" 
+                                data-team-id="{{ equip.maintenance_team_id }}" 
+                                data-default-technician="{{ equip.default_technician or '' }}"
+                                {% if request and request.equipment_id == equip.id %}selected{% endif %}>
+                            {{ equip.name }} ({{ equip.serial_number }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="category">Category (Auto-filled):</label>
+                <input type="text" id="category" name="category" value="{{ request.category if request else '' }}" readonly>
+            </div>
+            
+            <div class="form-group">
+                <label for="maintenance_team_id">Maintenance Team (Auto-filled):</label>
+                <select id="maintenance_team_id" name="maintenance_team_id" readonly disabled>
+                    <option value="">Select Equipment First</option>
+                    {% for team in teams %}
+                        <option value="{{ team.id }}" {% if request and request.maintenance_team_id == team.id %}selected{% endif %}>{{ team.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="assigned_technician">Assigned Technician:</label>
+                <input type="text" id="assigned_technician" name="assigned_technician" value="{{ request.assigned_technician if request else '' }}">
+            </div>
+            
+            <div class="form-group" id="scheduled_date_group" style="display: none;">
+                <label for="scheduled_date">Scheduled Date:</label>
+                <input type="datetime-local" id="scheduled_date" name="scheduled_date" value="{{ request.scheduled_date.strftime('%Y-%m-%dT%H:%M') if request and request.scheduled_date else '' }}">
+            </div>
+            
+            <div class="form-group" id="duration_group" style="display: none;">
+                <label for="duration_hours">Duration (hours):</label>
+                <input type="number" id="duration_hours" name="duration_hours" step="0.1" value="{{ request.duration_hours if request and request.duration_hours else '' }}">
+            </div>
+            
+            {% if request %}
+            <div class="form-group">
+                <label for="stage">Stage:</label>
+                <select id="stage" name="stage" required>
+                    <option value="New" {% if request.stage == 'New' %}selected{% endif %}>New</option>
+                    <option value="In Progress" {% if request.stage == 'In Progress' %}selected{% endif %}>In Progress</option>
+                    <option value="Repaired" {% if request.stage == 'Repaired' %}selected{% endif %}>Repaired</option>
+                    <option value="Scrap" {% if request.stage == 'Scrap' %}selected{% endif %}>Scrap</option>
+                </select>
+            </div>
+            {% endif %}
+            
+            <button type="submit" class="btn btn-primary">{% if request %}Update{% else %}Create{% endif %} Request</button>
+            <a href="{{ url_for('maintenance_requests') }}" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+    
+    <script>
+        // Show/hide scheduled date based on request type
+        function toggleScheduledDate() {
+            const requestType = document.getElementById('request_type').value;
+            const scheduledDateGroup = document.getElementById('scheduled_date_group');
+            const durationGroup = document.getElementById('duration_group');
+            
+            if (requestType === 'Preventive') {
+                scheduledDateGroup.style.display = 'block';
+            } else {
+                scheduledDateGroup.style.display = 'none';
+            }
+            
+            // Duration is only relevant when editing (for Repaired status)
+            if (document.querySelector('input[name="_method"]')) {
+                durationGroup.style.display = 'block';
+            }
+        }
+        
+        // Auto-fill equipment info when equipment is selected
+        function autoFillEquipmentInfo() {
+            const equipmentSelect = document.getElementById('equipment_id');
+            const selectedOption = equipmentSelect.options[equipmentSelect.selectedIndex];
+            
+            if (selectedOption.value) {
+                // Fill category
+                document.getElementById('category').value = selectedOption.dataset.category || '';
+                
+                // Fill maintenance team
+                const teamSelect = document.getElementById('maintenance_team_id');
+                teamSelect.value = selectedOption.dataset.teamId || '';
+                
+                // Fill assigned technician if not already set
+                const techInput = document.getElementById('assigned_technician');
+                if (!techInput.value) {
+                    techInput.value = selectedOption.dataset.defaultTechnician || '';
+                }
+            } else {
+                document.getElementById('category').value = '';
+                document.getElementById('maintenance_team_id').value = '';
+            }
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleScheduledDate();
+            // Only auto-fill if creating new request (not editing)
+            const isEditing = document.querySelector('.container').dataset.isEditing === 'true';
+            if (!isEditing) {
+                autoFillEquipmentInfo();
+            }
+        });
+    </script>
+</body>
+</html>
